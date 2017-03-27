@@ -7,14 +7,13 @@ use App\Post;
 use Auth;
 use Session;
 use DB;
+use Carbon\Carbon;
+use Image;
+use File;
 
 class PostsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function index()
     {
         $posts = Post::latest()->take(6)->get();
@@ -22,27 +21,20 @@ class PostsController extends Controller
         return view('/posts/index', compact('posts'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
     public function create()
-    {
-        $post = DB::table('posts')->get();
-        return view('posts/create_post');
+        {  
+            $post = DB::table('posts')->get();
+            session::flash('fail','You must log in to your account!');
+            return view('posts/create_post');
+       
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
-    {
+    {   
         $post = new Post;
         /*$post->banner=request('banner');*/
+        $post->user_id = Auth::user()->id;
         $post->title=request('title');
         $post->body=request('body');
 
@@ -50,7 +42,7 @@ class PostsController extends Controller
         session::flash('success','You have successfully created  a new post!');
 
         return back();
-    }
+    } 
 
 
     //this function was to show all posts on /all_posts
@@ -60,49 +52,85 @@ class PostsController extends Controller
         return view('posts/show_all_posts', compact('posts'));
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show_post(Post $post)
     {
         return view('posts.show_post', compact('post'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function edit($id)
     {
-        //
+        $post= Post::find($id);
+        return view('posts/edit_post', compact('post'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
-        //
+        $post= Post::find($id);
+        if ($request->hasFile('post_banner')) {
+            $banner = $request->file('post_banner');
+            $filename = time().'.'.$banner->getClientOriginalExtension();
+
+            if ($post->banner !== 'underthesun.png') {
+                $file = public_path('/images/'.$post->banner);
+
+                if (File::exists($file)) {
+                    unlink($file);
+                }
+
+            }
+
+            Image::make($banner)->save( public_path('/images/'.$filename));
+        }
+            //$user = Auth::user();
+            $post->banner = $filename;
+
+            
+        
+        $post->title=$request->title;
+        $post->body=$request->body;
+        $post->save();
+        return back();
+
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+
+    public function destroy($post_id)
     {
-        //
+        //$post= Post::find($id);
+         $post =Post::where('id',$post_id)->first();
+        $post->delete();
+        return back();
     }
+
+    // public function update_banner(Request $request) {
+
+        
+    //     if ($request->hasFile('post_banner')) {
+    //         $banner = $request->file('post_banner');
+    //         $filename = time().'.'.$banner->getClientOriginalExtension();
+
+    //         if ($post->banner !== 'underthesun.png') {
+    //             $file = public_path('/images/'.$post->banner);
+
+    //             if (File::exists($file)) {
+    //                 unlink($file);
+    //             }
+
+    //         }
+
+    //         Image::make($banner)->save( public_path('/images/'.$filename));
+
+    //         //$user = Auth::user();
+    //         $post->banner = $filename;
+    //         $post->save();
+    //     }
+
+    //     return back();
+
+    
+
+    // }
 }

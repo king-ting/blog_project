@@ -1,6 +1,8 @@
 @extends('partials/master')
 @section('main_content')
 
+@if (Auth::check()) {
+
 <div class="container">
 	<form class="form-horizontal" method="POST" action="/post">
 	{{csrf_field()}}
@@ -32,12 +34,17 @@
 		    </div>
 		    <div class="form-group">
 		      <div class="col-lg-10 col-lg-offset-2">
-		       <button type="submit" class="btn btn-primary">Submit</button>
+		       <button type="submit" class="btn btn-default">Submit</button>
 		        <button type="reset" class="btn btn-default">Cancel</button>
 		      </div>
 		    </div>
 	  	</fieldset>
   	</form>
 </div>
+
+} @elseif (Session::has('fail'))
+    {{Session::get('fail')}}
+    @include('auth/login')
+@endif
 
 @endsection

@@ -87,6 +87,32 @@ img.img-size-index {
   border: 5px solid #E76229;
 }
 
+.navbar-default .navbar-nav>li>a {
+  color: #000;
+}
+
+li {
+  list-style-type: none;
+}
+
+@font-face {
+    font-family: adlery;
+    src: url('/fonts/adlery.tff');
+}
+
+a {
+  color: #000;
+}
+
+a:hover {
+  color: gray;
+  
+}
+a.text-size {
+  font-size: 20px;
+}
+
+
 /*END CSS for Images*/
 
 /*.footer {
